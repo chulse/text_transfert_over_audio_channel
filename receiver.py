@@ -7,6 +7,7 @@ import numpy as np
 import pyaudio
 import struct
 import matplotlib.pyplot as plt
+import Hamming as hm
 
 
 # In[92]:
@@ -125,7 +126,36 @@ def filtered(sig, choice,full):
 # In[98]:
 
 def decode_letter(letter):
-    binary = int("0b"+letter,base=2)
+    
+###### try decoding here: ##########
+
+#test decoding:
+    print("DECODING: " + letter)
+    
+    binary_int = int("0b"+letter,base=2)#int(str_text, 2)
+    byte_number = (binary_int.bit_length() + 7)// 8
+    print('bytes number : ' + str(byte_number))
+    binary_array = binary_int.to_bytes(byte_number, "big")
+
+    txt_bytes = binary_array
+    after_txt = ""
+    print("num bytes " + str(len(txt_bytes)) )
+    for i in range(len(txt_bytes)):
+        byte, error, corrected = hm.hamming_decode_byte(txt_bytes[i])
+        temp_txt = format(byte, '04b')
+        #print("tmp: (len, txt) " + str(len(temp_txt)) + "," + temp_txt)
+        after_txt += temp_txt #[2:-1]  #take out the b from the binary string, and one extra character for padding"
+
+    print("text after: (len, txt) " + str(len(after_txt)) + "," + after_txt)
+
+    # binary_int = int(after_txt, 2)
+    # byte_number = (binary_int.bit_length() + 7) // 8
+    # binary_array = binary_int.to_bytes(byte_number, "big")
+    # ascii_text = binary_array.decode()
+    # print("ascii: " + ascii_text)
+
+######
+    binary = int("0b"+after_txt,base=2)
     m = ""
     try :
         m = binary.to_bytes((binary.bit_length() + 7) // 8, 'big').decode() #decoding from built-in functions in python
@@ -139,8 +169,8 @@ def decode_letter(letter):
 def decode(bin_text):
     str_text = "".join([ str(c) for c in bin_text])
     string = ""
-    for i in range(0,len(str_text),8):
-        letter = decode_letter(str_text[i:i+8])
+    for i in range(0,len(str_text),16):
+        letter = decode_letter(str_text[i:i+16])
         if(letter != False):
             string += letter
         if len(string)>len(TEST) and string[len(string)-len(TEST):]==TEST:

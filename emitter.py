@@ -8,6 +8,7 @@ import scipy.io.wavfile as sc
 import soundfile as sf
 import sounddevice as sd
 import sys
+import Hamming as hm
 
 
 # In[21]:
@@ -32,10 +33,47 @@ TEST = "_t_"
 # In[3]:
 
 def encode(text):
-    int_text = int.from_bytes(text.encode(), 'big')
-    bin_text = str(bin(int_text))
-    bin_text = [0] + [int(d) for d in bin_text[2:]] #take out the b from the binary string"
-    return bin_text
+    #int_text = int.from_bytes(text.encode(), 'big')
+    after_txt = ""
+    txt_bytes = bytes(text, 'ascii')
+    for i in range(len(txt_bytes)):
+        #print("BYTE BFEORE ENCODING: " + str(txt_bytes[i]))
+        temp_txt = format(hm.hamming_encode_nibble((txt_bytes[i] & 0xf0) >> 4), '08b')
+        #print("tmp: (len, txt) " + str(len(temp_txt)) + "," + temp_txt)
+        after_txt += temp_txt #[2:-1]  #take out the b from the binary string, and one extra character for padding"
+        temp_txt = format(hm.hamming_encode_nibble(txt_bytes[i] & 0x0f), '08b')
+        #print("tmp: (len, txt) " + str(len(temp_txt)) + "," + temp_txt)
+        after_txt += temp_txt #[2:-1]
+
+    
+    print("text after: (len, txt) " + str(len(after_txt)) + "," + after_txt)
+
+    # #test decoding:
+    # print("DECODING")
+    
+    # binary_int = int(after_txt, 2)
+    # byte_number = (binary_int.bit_length() + 7)// 8
+    # print('bytes number : ' + str(byte_number))
+    # binary_array = binary_int.to_bytes(byte_number, "big")
+
+    # txt_bytes = binary_array
+    # after_txt = ""
+    # print("num bytes " + str(len(txt_bytes)) )
+    # for i in range(len(txt_bytes)):
+    #     byte, error, corrected = hm.hamming_decode_byte(txt_bytes[i])
+    #     temp_txt = format(byte, '04b')
+    #     #print("tmp: (len, txt) " + str(len(temp_txt)) + "," + temp_txt)
+    #     after_txt += temp_txt #[2:-1]  #take out the b from the binary string, and one extra character for padding"
+
+    # print("text after: (len, txt) " + str(len(after_txt)) + "," + after_txt)
+
+    # binary_int = int(after_txt, 2)
+    # byte_number = (binary_int.bit_length() + 7) // 8
+    # binary_array = binary_int.to_bytes(byte_number, "big")
+    # ascii_text = binary_array.decode()
+    # print("ascii: " + ascii_text)
+
+    return after_txt
 
 
 # In[4]:
