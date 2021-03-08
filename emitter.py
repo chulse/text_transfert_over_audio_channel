@@ -33,6 +33,12 @@ TEST = "_t_"
 # In[3]:
 
 def encode(text):
+    int_text = int.from_bytes(text.encode(), 'big')
+    bin_text = str(bin(int_text))
+    bin_text = [0] + [int(d) for d in bin_text[2:]] #take out the b from the binary string"
+    return bin_text
+
+def hamming_encode(text):
     #int_text = int.from_bytes(text.encode(), 'big')
     after_txt = ""
     txt_bytes = bytes(text, 'ascii')
@@ -47,6 +53,7 @@ def encode(text):
 
     
     print("text after: (len, txt) " + str(len(after_txt)) + "," + after_txt)
+    bin_text = after_txt
 
     # #test decoding:
     # print("DECODING")
@@ -73,7 +80,7 @@ def encode(text):
     # ascii_text = binary_array.decode()
     # print("ascii: " + ascii_text)
 
-    return after_txt
+    return bin_text
 
 
 # In[4]:
@@ -134,7 +141,7 @@ def get_test_signal():
 # In[8]:
 
 def emitter_real(text):
-    modul = double_cosinus(encode(text))
+    modul = double_cosinus(text)
     sync = get_sync_signal()
     test = get_test_signal()
     return np.append(np.append(np.append(sync,np.append(test,modul)),test), test)
@@ -144,7 +151,8 @@ def emitter_real(text):
 
 def emitter(filepath):
     with open(filepath, "r") as data:
-        x = emitter_real(data.read())
+        hamming_txt = hamming_encode(data.read())
+        x = emitter_real(hamming_txt)
         sc.write("emitter2b.wav",Fs,x)
         samples, samplerate = sf.read('emitter2b.wav')
         sd.play(samples, samplerate)

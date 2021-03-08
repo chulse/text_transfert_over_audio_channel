@@ -169,8 +169,8 @@ def decode_letter(letter):
 def decode(bin_text):
     str_text = "".join([ str(c) for c in bin_text])
     string = ""
-    for i in range(0,len(str_text),16):
-        letter = decode_letter(str_text[i:i+16])
+    for i in range(0,len(str_text),8):
+        letter = decode_letter(str_text[i:i+8])
         if(letter != False):
             string += letter
         if len(string)>len(TEST) and string[len(string)-len(TEST):]==TEST:
