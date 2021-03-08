@@ -7,6 +7,7 @@ import numpy as np
 import pyaudio
 import struct
 import matplotlib.pyplot as plt
+import Hamming as hm
 
 
 # In[92]:
@@ -149,6 +150,45 @@ def decode(bin_text):
     return string
 
 def decode_hamming(bin_text):
+    
+    #test decoding:
+    
+    input_txt = "".join([ str(c) for c in bin_text])
+    print("Decoding hamming: " + input_txt)
+    string = ""
+    for i in range(0,len(input_txt),8): #find the _t_ and truncate the text
+        letter = decode_letter(input_txt[i:i+8])
+        if(letter != False and letter in TEST):
+            string += letter
+        else:
+            string = ""
+        if (string == TEST):
+            input_txt = input_txt[:i-16] #take off the last 2 bits === "_t"
+            break
+
+    print("Decoding hamming2: " + str(len(input_txt)) + "," + input_txt)
+    binary_int = int(input_txt, 2)
+    byte_number = (binary_int.bit_length() + 7)// 8
+    print('bytes number : ' + str(byte_number))
+    binary_array = binary_int.to_bytes(byte_number, "big")
+
+    txt_bytes = binary_array
+    after_txt = ""
+    print("num bytes " + str(len(txt_bytes)) )
+    for i in range(len(txt_bytes)):
+        byte, error, corrected = hm.hamming_decode_byte(txt_bytes[i])
+        temp_txt = format(byte, '04b')
+        print("tmp: (len, txt) " + str(len(temp_txt)) + "," + temp_txt)
+        after_txt += temp_txt #[2:-1]  #take out the b from the binary string, and one extra character for padding"
+
+    print("text after: (len, txt) " + str(len(after_txt)) + "," + after_txt)
+
+    binary_int = int(after_txt, 2)
+    byte_number = (binary_int.bit_length() + 7) // 8
+    binary_array = binary_int.to_bytes(byte_number, "big")
+    ascii_text = binary_array.decode()
+    print("ascii: " + ascii_text)
+
     return bin_text
 
 # In[100]:
@@ -269,8 +309,8 @@ def receiver():
     x = x[TEST_LEN:] #removes first testlen
     print(t0) #should be testlen
     print(t1)
-    print(decode_hamming(filtered(x,0,True)))
-    print(decode_hamming(filtered(x,1,True)))
+    print(filtered(x,0,True))
+    print(filtered(x,1,True))
     print("reeee")
     if(t0 == TEST):
         return decode_hamming(filtered(x,0,True)) #should be data with testlen removed now

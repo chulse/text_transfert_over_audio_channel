@@ -53,32 +53,7 @@ def hamming_encode(text):
 
     
     print("text after: (len, txt) " + str(len(after_txt)) + "," + after_txt)
-    bin_text = after_txt
-
-    # #test decoding:
-    # print("DECODING")
-    
-    # binary_int = int(after_txt, 2)
-    # byte_number = (binary_int.bit_length() + 7)// 8
-    # print('bytes number : ' + str(byte_number))
-    # binary_array = binary_int.to_bytes(byte_number, "big")
-
-    # txt_bytes = binary_array
-    # after_txt = ""
-    # print("num bytes " + str(len(txt_bytes)) )
-    # for i in range(len(txt_bytes)):
-    #     byte, error, corrected = hm.hamming_decode_byte(txt_bytes[i])
-    #     temp_txt = format(byte, '04b')
-    #     #print("tmp: (len, txt) " + str(len(temp_txt)) + "," + temp_txt)
-    #     after_txt += temp_txt #[2:-1]  #take out the b from the binary string, and one extra character for padding"
-
-    # print("text after: (len, txt) " + str(len(after_txt)) + "," + after_txt)
-
-    # binary_int = int(after_txt, 2)
-    # byte_number = (binary_int.bit_length() + 7) // 8
-    # binary_array = binary_int.to_bytes(byte_number, "big")
-    # ascii_text = binary_array.decode()
-    # print("ascii: " + ascii_text)
+    bin_text = [int(d) for d in after_txt] 
 
     return bin_text
 
@@ -152,6 +127,7 @@ def emitter_real(text):
 def emitter(filepath):
     with open(filepath, "r") as data:
         hamming_txt = hamming_encode(data.read())
+        print("Hamming coded data: " + str(hamming_txt))
         x = emitter_real(hamming_txt)
         sc.write("emitter2b.wav",Fs,x)
         samples, samplerate = sf.read('emitter2b.wav')
