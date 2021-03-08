@@ -7,7 +7,6 @@ import numpy as np
 import pyaudio
 import struct
 import matplotlib.pyplot as plt
-import Hamming as hm
 
 
 # In[92]:
@@ -27,7 +26,7 @@ A = 1 #amplitude of the signal
 FREQ_THRESHOLD = 30 #must be smaller than Fdev
 
 CHUNK = 1024
-RECORD_SECONDS = 70
+RECORD_SECONDS = 20
 CHANNELS = 1
 FORMAT = pyaudio.paInt16
 
@@ -126,36 +125,7 @@ def filtered(sig, choice,full):
 # In[98]:
 
 def decode_letter(letter):
-    
-###### try decoding here: ##########
-
-#test decoding:
-    print("DECODING: " + letter)
-    
-    binary_int = int("0b"+letter,base=2)#int(str_text, 2)
-    byte_number = (binary_int.bit_length() + 7)// 8
-    print('bytes number : ' + str(byte_number))
-    binary_array = binary_int.to_bytes(byte_number, "big")
-
-    txt_bytes = binary_array
-    after_txt = ""
-    print("num bytes " + str(len(txt_bytes)) )
-    for i in range(len(txt_bytes)):
-        byte, error, corrected = hm.hamming_decode_byte(txt_bytes[i])
-        temp_txt = format(byte, '04b')
-        #print("tmp: (len, txt) " + str(len(temp_txt)) + "," + temp_txt)
-        after_txt += temp_txt #[2:-1]  #take out the b from the binary string, and one extra character for padding"
-
-    print("text after: (len, txt) " + str(len(after_txt)) + "," + after_txt)
-
-    # binary_int = int(after_txt, 2)
-    # byte_number = (binary_int.bit_length() + 7) // 8
-    # binary_array = binary_int.to_bytes(byte_number, "big")
-    # ascii_text = binary_array.decode()
-    # print("ascii: " + ascii_text)
-
-######
-    binary = int("0b"+after_txt,base=2)
+    binary = int("0b"+letter,base=2)
     m = ""
     try :
         m = binary.to_bytes((binary.bit_length() + 7) // 8, 'big').decode() #decoding from built-in functions in python
@@ -168,6 +138,7 @@ def decode_letter(letter):
 
 def decode(bin_text):
     str_text = "".join([ str(c) for c in bin_text])
+    print("Rec: (len,str)"+ str(len(str_text)) + "," + str_text)
     string = ""
     for i in range(0,len(str_text),8):
         letter = decode_letter(str_text[i:i+8])
@@ -177,6 +148,8 @@ def decode(bin_text):
             return string[:len(string)-len(TEST)]
     return string
 
+def decode_hamming(bin_text):
+    return bin_text
 
 # In[100]:
 
@@ -291,15 +264,18 @@ def receiver():
     ls = listen_to_signal()
     x = sync(ls)
     
-    t0 = decode(filtered(x,0,False))
+    t0 = decode(filtered(x,0,False)) #just filters the first data out up to testlen
     t1 = decode(filtered(x,1,False))
-    x = x[TEST_LEN:]
-    print(t0)
+    x = x[TEST_LEN:] #removes first testlen
+    print(t0) #should be testlen
     print(t1)
+    print(decode_hamming(filtered(x,0,True)))
+    print(decode_hamming(filtered(x,1,True)))
+    print("reeee")
     if(t0 == TEST):
-        return decode(filtered(x,0,True))
+        return decode_hamming(filtered(x,0,True)) #should be data with testlen removed now
     elif(t1==TEST):
-        return decode(filtered(x,1,True))
+        return decode_hamming(filtered(x,1,True))
     else:
         print("Fatal Error !")
 
