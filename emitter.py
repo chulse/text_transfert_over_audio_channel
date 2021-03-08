@@ -52,7 +52,7 @@ def hamming_encode(text):
         after_txt += temp_txt #[2:-1]
 
     
-    print("text after: (len, txt) " + str(len(after_txt)) + "," + after_txt)
+    # print("text after: (len, txt) " + str(len(after_txt)) + "," + after_txt)
     bin_text = [int(d) for d in after_txt] 
 
     return bin_text
@@ -127,12 +127,14 @@ def emitter_real(text):
 def emitter(filepath):
     with open(filepath, "r") as data:
         hamming_txt = hamming_encode(data.read())
-        print("Hamming coded data: " + str(hamming_txt))
+        # print("Hamming coded data: " + str(hamming_txt))
+        print("Sending message.....")
         x = emitter_real(hamming_txt)
         sc.write("emitter2b.wav",Fs,x)
         samples, samplerate = sf.read('emitter2b.wav')
         sd.play(samples, samplerate)
         sd.wait()
+        print("Done!")
 
 
 # In[14]:

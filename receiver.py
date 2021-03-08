@@ -27,7 +27,7 @@ A = 1 #amplitude of the signal
 FREQ_THRESHOLD = 30 #must be smaller than Fdev
 
 CHUNK = 1024
-RECORD_SECONDS = 20
+RECORD_SECONDS = 180
 CHANNELS = 1
 FORMAT = pyaudio.paInt16
 
@@ -328,7 +328,8 @@ def receiver():
 
 def main():
     x = receiver()
-    print("Received: " + x)
+    if (x):
+        print("Received: " + x)
 
 if __name__ == "__main__":
     main()
